@@ -1,0 +1,26 @@
+# Opensea API related things
+apitests/
+
+# Assets and ressources of the projects
+project_ressources/
+
+# Python venv
+venv/
+
+# Mac finder thing
+.DS_Store
+
+# Logs
+*.log
+
+# Test csv
+*.csv
+
+# Temporary files
+*temp*
+
+# PSQL Help
+ignore*
+
+# Backup files, buffer for dev
+backup/
