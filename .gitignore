@@ -24,3 +24,6 @@ ignore*
 
 # Backup files, buffer for dev
 backup/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
