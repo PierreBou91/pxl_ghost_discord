@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import os
+from os import environ
 import db_discord_helper as db
 
 bot = commands.Bot(
@@ -20,4 +20,4 @@ async def add_user(ctx):
     db.add_user(ctx)
 
 
-bot.run(os.environ['CYBER_GHOST_TOKEN'])
+bot.run(environ['CYBER_GHOST_TOKEN'])
