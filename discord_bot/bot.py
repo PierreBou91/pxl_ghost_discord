@@ -27,14 +27,12 @@ async def on_message(message):
     if message.author.id == 931674481628434503:
         return
 
-    if message.content == 'ping':
+    if str(message.content).casefold() == 'ping':
         await message.channel.send('pong')
-    elif message.content == 'pong':
+    elif str(message.content).casefold() == 'pong':
         await message.channel.send('NO, YOU have to say ping and ONLY I get to say pong !')
-    elif message.content == 'f':
+    elif str(message.content).casefold() == 'f':
         await message.channel.send('f')
-    elif message.content == 'F':
-        await message.channel.send('F')
     
     await bot.process_commands(message)
 
