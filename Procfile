@@ -1,1 +1,1 @@
-worker: python3 test_db.py
+web: python3 test_db.py
