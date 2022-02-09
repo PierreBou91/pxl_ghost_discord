@@ -18,8 +18,8 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     # don't respond to ourselves
-    # if message.author == self.user:
-    #     return
+    if message.author.id == 931674481628434503:
+        return
 
     if message.content == 'eltesto':
         await message.channel.send('ONLY ONE DYNO')
