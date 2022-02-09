@@ -1,1 +1,1 @@
-web: python3 discord_bot/test_db.py
+worker: python discord_bot/test_db.py
