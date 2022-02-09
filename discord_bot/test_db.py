@@ -15,6 +15,15 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
+@bot.event
+async def on_message(self, message):
+    # don't respond to ourselves
+    if message.author == self.user:
+        return
+
+    if message.content == 'eltesto':
+        await message.channel.send('ONLY ONE DYNO')
+
 @bot.command()
 async def add_user(ctx, wallet):
     db.add_user(ctx, wallet)
