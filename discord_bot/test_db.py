@@ -16,10 +16,10 @@ async def on_ready():
     print('------')
 
 @bot.event
-async def on_message(self, message):
+async def on_message(message):
     # don't respond to ourselves
-    if message.author == self.user:
-        return
+    # if message.author == self.user:
+    #     return
 
     if message.content == 'eltesto':
         await message.channel.send('ONLY ONE DYNO')
