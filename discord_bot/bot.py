@@ -34,6 +34,7 @@ async def on_message(message):
     elif str(message.content).casefold() == 'f':
         await message.channel.send('f')
     
+    # Necessary command for the command to work
     await bot.process_commands(message)
 
 #########################################
