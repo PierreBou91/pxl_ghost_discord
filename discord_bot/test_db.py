@@ -16,8 +16,8 @@ async def on_ready():
     print('------')
 
 @bot.command()
-async def add_user(ctx):
-    db.add_user(ctx)
+async def add_user(ctx, wallet):
+    db.add_user(ctx, wallet)
 
 
 bot.run(environ['CYBER_GHOST_TOKEN'])
