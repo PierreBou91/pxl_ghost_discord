@@ -21,6 +21,6 @@ async def add_user(ctx, wallet):
 
 @bot.command()
 async def test(ctx):
-        await ctx.send("Heroku works")
+    await ctx.send("Heroku works")
 
 bot.run(environ['CYBER_GHOST_TOKEN'])
