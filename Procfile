@@ -1,1 +1,1 @@
-bot: python discord_bot/test_db.py
+bot: python discord_bot/bot.py

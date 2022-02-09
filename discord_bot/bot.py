@@ -3,6 +3,9 @@ from discord.ext import commands
 from os import environ
 import db_discord_helper as db
 
+#########################################
+#           BOILER PLATE CODE           #
+#########################################
 bot = commands.Bot(
     command_prefix='/',
     description="Test discord bot on Heroku",
@@ -15,14 +18,14 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
+#########################################
+#               ON MESSAGE              #
+#########################################
 @bot.event
 async def on_message(message):
     # don't respond to ourselves
     if message.author.id == 931674481628434503:
         return
-
-    if message.content == 'eltesto':
-        await message.channel.send('ONLY ONE DYNO')
 
     if message.content == 'ping':
         await message.channel.send('pong')
@@ -33,6 +36,16 @@ async def on_message(message):
     elif message.content == 'F':
         await message.channel.send('F')
 
+#########################################
+#             ON MEMBER JOIN            #
+#########################################
+@bot.event
+async def on_member_join(member):
+    await member.add_roles(932799395865444382)
+
+#########################################
+#              COMMANDS                 #
+#########################################
 @bot.command()
 async def add_user(ctx, wallet):
     db.add_user(ctx, wallet)
@@ -40,5 +53,9 @@ async def add_user(ctx, wallet):
 @bot.command()
 async def test(ctx):
     await ctx.send("Heroku works")
+
+#########################################
+#          TESTING COMMANDS             #
+#########################################
 
 bot.run(environ['CYBER_GHOST_TOKEN'])
