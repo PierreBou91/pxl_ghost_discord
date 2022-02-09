@@ -32,7 +32,7 @@ async def on_message(message):
     elif str(message.content).casefold() == 'pong':
         await message.channel.send('NO, YOU have to say ping and ONLY I get to say pong !')
     elif str(message.content).casefold() == 'f':
-        await message.channel.send('f')
+        await message.channel.send('F')
     
     # Necessary command for the command to work
     await bot.process_commands(message)
