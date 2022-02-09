@@ -19,6 +19,17 @@ async def on_ready():
     print('------')
 
 #########################################
+#              COMMANDS                 #
+#########################################
+@bot.command()
+async def add_user(ctx, wallet):
+    db.add_user(ctx, wallet)
+
+@bot.command()
+async def test(ctx):
+    await ctx.send("Heroku works")
+
+#########################################
 #               ON MESSAGE              #
 #########################################
 @bot.event
@@ -43,16 +54,6 @@ async def on_message(message):
 async def on_member_join(member):
     await member.add_roles(932799395865444382)
 
-#########################################
-#              COMMANDS                 #
-#########################################
-@bot.command()
-async def add_user(ctx, wallet):
-    db.add_user(ctx, wallet)
-
-@bot.command()
-async def test(ctx):
-    await ctx.send("Heroku works")
 
 #########################################
 #          TESTING COMMANDS             #
