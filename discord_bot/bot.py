@@ -19,17 +19,6 @@ async def on_ready():
     print('------')
 
 #########################################
-#              COMMANDS                 #
-#########################################
-@bot.command()
-async def add_user(ctx, wallet):
-    db.add_user(ctx, wallet)
-
-@bot.command()
-async def test(ctx):
-    await ctx.send("Heroku works")
-
-#########################################
 #               ON MESSAGE              #
 #########################################
 @bot.event
@@ -46,6 +35,19 @@ async def on_message(message):
         await message.channel.send('f')
     elif message.content == 'F':
         await message.channel.send('F')
+    
+    await bot.process_commands(message)
+
+#########################################
+#              COMMANDS                 #
+#########################################
+@bot.command()
+async def add_user(ctx, wallet):
+    db.add_user(ctx, wallet)
+
+@bot.command()
+async def test(ctx):
+    await ctx.send("Heroku works")
 
 #########################################
 #             ON MEMBER JOIN            #
