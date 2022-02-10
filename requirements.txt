@@ -21,7 +21,6 @@ discord==1.7.3
 discord.py==1.7.3
 entrypoints==0.3
 filelock==3.4.2
-gdown==4.2.1
 idna==3.3
 ipykernel==6.6.1
 ipython==7.31.0
