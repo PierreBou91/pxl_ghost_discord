@@ -3,6 +3,7 @@ from discord.ext import commands
 from os import environ
 import db_discord_helper as db
 import random
+import aws_connect_helper as s3
 
 #########################################
 #           BOILER PLATE CODE           #
@@ -46,24 +47,20 @@ async def add_user(ctx, wallet):
     db.add_user(ctx, wallet)
 
 @bot.command()
-async def test(ctx):
-    await ctx.send("Heroku works")
-
-@bot.command()
 async def ghost(ctx, number: int):
     r = random.randint(1,10000)
     try:
         if (number == 0):
-            file = discord.File(f'Ghost_Collection/{r}.png')
+            file = discord.File(s3.get_ghost(r), filename='ghost.png')
             await ctx.reply(file=file, content=f'''You called a random ghost, I'm the number {r}''')
         elif (number in (9903,9904,9905)):
-            file = discord.File(f'Ghost_Collection/{number}.png')
+            file = discord.File(s3.get_ghost(number), filename='ghost.png')
             await ctx.reply(file=file, content=f'''Hello, I'm the ghost number {number}''')
         elif (number > 9900 and number < 10001):
-            file = discord.File(f'Ghost_Collection/mystery.png')
+            file = file = discord.File(s3.get_ghost('mystery'), filename='ghost.png')
             await ctx.reply(file=file, content=f'''Hello, I'm the mystery ghost...''')
         else:
-            file = discord.File(f'Ghost_Collection/{number}.png')
+            file = discord.File(s3.get_ghost(number), filename='ghost.png')
             await ctx.reply(file=file, content=f'''Hello, I'm the ghost number {number}''')
     except Exception:
         await ctx.reply('You have to give a number between 1 and 10000')
