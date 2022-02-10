@@ -55,7 +55,6 @@ async def test(ctx):
 async def on_member_join(member):
     await member.add_roles(932799395865444382)
 
-
 #########################################
 #          TESTING COMMANDS             #
 #########################################
