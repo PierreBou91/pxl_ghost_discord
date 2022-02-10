@@ -9,7 +9,7 @@ import random
 #########################################
 bot = commands.Bot(
     command_prefix='/',
-    description="Test discord bot on Heroku",
+    description="Discord bot on Heroku",
     intents=discord.Intents.default())
 
 @bot.event
@@ -54,16 +54,16 @@ async def ghost(ctx, number: int):
     r = random.randint(1,10000)
     try:
         if (number == 0):
-            file = discord.File(f'Ghost Collection/{r}.png')
+            file = discord.File(f'Ghost_Collection/{r}.png')
             await ctx.reply(file=file, content=f'''You called a random ghost, I'm the number {r}''')
         elif (number in (9903,9904,9905)):
-            file = discord.File(f'Ghost Collection/{number}.png')
+            file = discord.File(f'Ghost_Collection/{number}.png')
             await ctx.reply(file=file, content=f'''Hello, I'm the ghost number {number}''')
         elif (number > 9900 and number < 10001):
-            file = discord.File(f'Ghost Collection/mystery.png')
+            file = discord.File(f'Ghost_Collection/mystery.png')
             await ctx.reply(file=file, content=f'''Hello, I'm the mystery ghost...''')
         else:
-            file = discord.File(f'Ghost Collection/{number}.png')
+            file = discord.File(f'Ghost_Collection/{number}.png')
             await ctx.reply(file=file, content=f'''Hello, I'm the ghost number {number}''')
     except Exception:
         await ctx.reply('You have to give a number between 1 and 10000')
