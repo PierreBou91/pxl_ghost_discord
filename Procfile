@@ -1,2 +1,2 @@
-release: ./on_release.sh
+release: sh on_release.sh
 bot: python discord_bot/bot.py
