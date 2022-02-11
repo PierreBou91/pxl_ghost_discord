@@ -8,10 +8,12 @@ import aws_connect_helper as s3
 #########################################
 #           BOILER PLATE CODE           #
 #########################################
+intents = discord.Intents.default()
+intents.members = True
 bot = commands.Bot(
     command_prefix='/',
     description="Discord bot on Heroku",
-    intents=discord.Intents.default())
+    intents=intents)
 
 @bot.event
 async def on_ready():
@@ -69,5 +71,6 @@ async def ghost(ctx, number: int):
 @bot.event
 async def on_member_join(member):
     await member.add_roles(932799395865444382)
+    db.add_user(db.member_adapter(member))
 
 bot.run(environ['CYBER_GHOST_TOKEN'])

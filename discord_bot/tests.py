@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from os import environ
 import db_discord_helper as db
-import random
 import texts
 
 #########################################
