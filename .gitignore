@@ -1,9 +1,6 @@
 # Opensea API related things
 apitests/
 
-# Assets and ressources of the projects
-project_ressources/
-
 # Python venv
 venv/
 
@@ -27,6 +24,3 @@ backup/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
-
-# The collection
-Ghost_Collection*

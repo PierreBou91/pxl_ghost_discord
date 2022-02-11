@@ -42,9 +42,6 @@ async def on_message(message):
 #########################################
 #              COMMANDS                 #
 #########################################
-@bot.command()
-async def add_user(ctx, wallet):
-    db.add_user(ctx, wallet)
 
 @bot.command()
 async def ghost(ctx, number: int):
@@ -72,9 +69,5 @@ async def ghost(ctx, number: int):
 @bot.event
 async def on_member_join(member):
     await member.add_roles(932799395865444382)
-
-#########################################
-#          TESTING COMMANDS             #
-#########################################
 
 bot.run(environ['CYBER_GHOST_TOKEN'])
