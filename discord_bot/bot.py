@@ -42,7 +42,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 #########################################
-#              COMMANDS                 #
+#           GENERAL COMMANDS            #
 #########################################
 
 @bot.command()
@@ -66,6 +66,46 @@ async def ghost(ctx, number: int):
         return
 
 #########################################
+#            ADMIN COMMANDS             #
+#########################################
+
+@bot.command()
+@commands.has_any_role("Admin")
+async def update_db(ctx):
+    # Load members from server
+    server_members_dict = {}
+    for mem in ctx.guild.members:
+        server_members_dict[str(mem.id)] = db.member_adapter_from_discord(mem)
+
+    # Load members from db
+    db_members_dict = db.get_members()
+
+    # Update the "is_here" value
+    has_left = []
+    ids = []
+
+    for id, mem in db_members_dict.items():
+        if (id not in server_members_dict):
+            has_left.append(mem)
+        else:
+            ids.append(str(id))
+
+    db.update_is_here(has_left, False)
+
+    # Update the nick and display_name
+    have_changed_nick_or_displayname =  []
+
+    for id in ids:
+        if server_members_dict[id].nick != db_members_dict[id].nick:
+            have_changed_nick_or_displayname.append(server_members_dict[id])
+        elif server_members_dict[id].display_name != db_members_dict[id].display_name:
+            have_changed_nick_or_displayname.append(server_members_dict[id])
+
+    db.update_nick_and_displayname(have_changed_nick_or_displayname)
+
+    await ctx.reply("Database updated ;D")
+
+#########################################
 #             ON MEMBER JOIN            #
 #########################################
 @bot.event
@@ -74,6 +114,8 @@ async def on_member_join(member):
     if not db.member_is_in_db(member):
         db.add_user(db.member_adapter_from_discord(member))
     else:
-        db.update_is_here(member, True)
+        memberlist = ()
+        memberlist.append(db.member_adapter_from_discord(member))
+        db.update_is_here(memberlist, True)
 
 bot.run(environ['CYBER_GHOST_TOKEN'])

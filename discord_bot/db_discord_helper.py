@@ -32,6 +32,9 @@ class GhostMember:
             return self.id == other.id
         return False
 
+    def __hash__(self):
+        return int(self.id)
+
 def member_adapter_from_discord(member):
     adapted_member = GhostMember(
         str(member.id),
@@ -159,7 +162,7 @@ def add_multiple_users(memberlist):
 ################ IN DEV ##################
 
 def get_members():
-    members = []
+    members = {}
     try:
         with conn_pool.getconn() as conn:
             with conn.cursor() as cursor:
@@ -170,7 +173,7 @@ def get_members():
                     """
                 )
                 for row in cursor.fetchall():
-                    members.append(member_adapter_from_db(row))
+                    members[str(row[0])] = member_adapter_from_db(row)
         return members
     except psycopg2.errors.UniqueViolation as e:
         return "UniqueViolation"
@@ -192,21 +195,43 @@ def member_is_in_db(member):
     except Exception as e:
         print(f"Exception in member_is_in_db(): {e}")
 
-def update_is_here(member, is_here):
+def update_is_here(memberlist, is_here):
     try:
-        with conn_pool.getconn() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    f"""
-                    UPDATE members
-                    SET is_here = '{is_here}'
-                    WHERE id = '{member.id}'
-                    """
-                )
-                conn.commit()
+        conn = conn_pool.getconn()
+        cursor = conn.cursor()
+        for mem in memberlist:
+            cursor.execute(
+                f"""
+                UPDATE members
+                SET is_here = '{is_here}'
+                WHERE id = '{mem.id}'
+                """
+            )
+        conn.commit()
+        cursor.close()
+        conn_pool.putconn(conn)
         return ("Done")
     except Exception as e:
         print(f"Exception in update_is_here(): {e}")    
+
+def update_nick_and_displayname(memberlist):
+    try:
+        conn = conn_pool.getconn()
+        cursor = conn.cursor()
+        for mem in memberlist:
+            cursor.execute(
+                f"""
+                UPDATE members
+                SET nick = '{mem.nick}', display_name = '{mem.display_name}'
+                WHERE id = '{mem.id}'
+                """
+            )
+        conn.commit()
+        cursor.close()
+        conn_pool.putconn(conn)
+        return ("Done")
+    except Exception as e:
+        print(f"Exception in update_nick_and_displayname(): {e}")   
 
 
 def safe_giveaway_launch(ctx, name, is_owner):
