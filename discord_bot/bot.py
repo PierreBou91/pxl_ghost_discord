@@ -98,17 +98,17 @@ async def update_db(ctx):
     db.update_is_here(has_left, False)
 
     # Update the nick and display_name
-    have_changed_nick_or_displayname =  []
+    have_changed = []
 
     for id in ids:
         if server_members_dict[id].nick != db_members_dict[id].nick:
-            have_changed_nick_or_displayname.append(server_members_dict[id])
+            have_changed.append(server_members_dict[id])
         elif server_members_dict[id].display_name != db_members_dict[id].display_name:
-            have_changed_nick_or_displayname.append(server_members_dict[id])
+            have_changed.append(server_members_dict[id])
         elif server_members_dict[id].top_role != db_members_dict[id].top_role:
-            have_changed_nick_or_displayname.append(server_members_dict[id])
+            have_changed.append(server_members_dict[id])
 
-    db.update_db(have_changed_nick_or_displayname)
+    db.update_db(have_changed)
 
     await ctx.reply("Database updated ;D")
 
