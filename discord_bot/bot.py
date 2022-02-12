@@ -105,8 +105,10 @@ async def update_db(ctx):
             have_changed_nick_or_displayname.append(server_members_dict[id])
         elif server_members_dict[id].display_name != db_members_dict[id].display_name:
             have_changed_nick_or_displayname.append(server_members_dict[id])
+        elif server_members_dict[id].top_role != db_members_dict[id].top_role:
+            have_changed_nick_or_displayname.append(server_members_dict[id])
 
-    db.update_nick_and_displayname(have_changed_nick_or_displayname)
+    db.update_db(have_changed_nick_or_displayname)
 
     await ctx.reply("Database updated ;D")
 

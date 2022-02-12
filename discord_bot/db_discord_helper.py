@@ -197,7 +197,7 @@ def update_is_here(memberlist, is_here):
     except Exception as e:
         print(f"Exception in update_is_here(): {e}")
 
-def update_nick_and_displayname(memberlist):
+def update_db(memberlist):
     try:
         conn = conn_pool.getconn()
         cursor = conn.cursor()
@@ -205,7 +205,7 @@ def update_nick_and_displayname(memberlist):
             cursor.execute(
                 f"""
                 UPDATE members
-                SET nick = '{mem.nick}', display_name = '{mem.display_name}'
+                SET nick = '{mem.nick}', display_name = '{mem.display_name}', top_role = '{mem.top_role}'
                 WHERE id = '{mem.id}'
                 """
             )
@@ -214,7 +214,7 @@ def update_nick_and_displayname(memberlist):
         conn_pool.putconn(conn)
         return ("Done")
     except Exception as e:
-        print(f"Exception in update_nick_and_displayname(): {e}")
+        print(f"Exception in update_db(): {e}")
 
 def member_is_in_db(member):
     try:
