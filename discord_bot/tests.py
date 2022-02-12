@@ -26,41 +26,22 @@ async def on_ready():
 #########################################
 #              COMMANDS                 #
 #########################################
-@bot.command()
-async def add_user(ctx, wallet):
-    result = db.add_user(ctx, wallet)
-    if result == "UniqueViolation":
-        print(f"{ctx.author.name} is already in the database")
-        return
-
-@bot.command()
-async def rules(ctx):
-    await ctx.send(texts.rules())
 
 @bot.command()
 @commands.has_any_role("Admin")
-async def giveaway(ctx, name, is_owner=False):
-    result = db.safe_giveaway_launch(ctx, name, is_owner)
-    if result == "UniqueViolation":
-        await ctx.send(f"The giveaway {name} is already ongoing !")
-        return
-    elif result == "OwnerUnique":
-        await ctx.send(f"There already is an owner giveaway ongoing !")
-        return      
-    elif result == "NonOwnerUnique":
-        await ctx.send(f"There already is a non-owner giveaway ongoing !")
-        return
+async def giveaway(ctx, is_owner=None):
+    is_owner = True if (is_owner == "owner") else False
+    is_only_giveaway = True if db.check_only_giveaway(is_owner) else False
+    if is_only_giveaway:
+        db.launch_giveaway(ctx, is_owner)
+        await ctx.reply(texts.giveaway(is_owner))
     else:
-        await ctx.send(texts.giveaway(name,is_owner))
+        await ctx.reply(texts.already_giveaway(is_owner))
 
 @bot.command()
 @commands.has_any_role("Admin")
-async def delete(ctx, giveaway):
-    result = db.delete_giveaway(giveaway)
-    if result == "Done":
-        await ctx.reply(f"Giveaway {giveaway} deleted !")
-    else:
-        await ctx.reply(f"No giveaway named: {giveaway}... error: {result}")
+async def delete(ctx, giveaway_id):
+    db.delete_giveaway(giveaway_id)
 
 @bot.command()
 async def giv(ctx, wallet):

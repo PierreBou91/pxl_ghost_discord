@@ -4,6 +4,7 @@ from os import environ
 import db_discord_helper as db
 import random
 import aws_connect_helper as s3
+import texts
 
 #########################################
 #           BOILER PLATE CODE           #
@@ -64,6 +65,10 @@ async def ghost(ctx, number: int):
     except Exception:
         await ctx.reply('You have to give a number between 1 and 10000')
         return
+
+@bot.command()
+async def rules(ctx):
+    await ctx.send(texts.rules())
 
 #########################################
 #            ADMIN COMMANDS             #

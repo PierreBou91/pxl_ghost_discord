@@ -159,8 +159,6 @@ def add_multiple_users(memberlist):
     except Exception as e:
         print(f"Exception in add_multiple_users: {e}")
 
-################ IN DEV ##################
-
 def get_members():
     members = {}
     try:
@@ -180,21 +178,6 @@ def get_members():
     except Exception as e:
         print(f"Exception in get_members: {e}")
 
-def member_is_in_db(member):
-    try:
-        with conn_pool.getconn() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    f"""
-                    SELECT *
-                    FROM members
-                    WHERE id = '{member.id}'
-                    """
-                )
-                return len(cursor.fetchall()) == 1
-    except Exception as e:
-        print(f"Exception in member_is_in_db(): {e}")
-
 def update_is_here(memberlist, is_here):
     try:
         conn = conn_pool.getconn()
@@ -212,7 +195,7 @@ def update_is_here(memberlist, is_here):
         conn_pool.putconn(conn)
         return ("Done")
     except Exception as e:
-        print(f"Exception in update_is_here(): {e}")    
+        print(f"Exception in update_is_here(): {e}")
 
 def update_nick_and_displayname(memberlist):
     try:
@@ -231,14 +214,22 @@ def update_nick_and_displayname(memberlist):
         conn_pool.putconn(conn)
         return ("Done")
     except Exception as e:
-        print(f"Exception in update_nick_and_displayname(): {e}")   
+        print(f"Exception in update_nick_and_displayname(): {e}")
 
-
-def safe_giveaway_launch(ctx, name, is_owner):
-    giveaway_limit = check_only_giveaway(is_owner)
-    if (giveaway_limit != "Done"):
-        return giveaway_limit
-    return launch_giveaway(ctx, name, is_owner)
+def member_is_in_db(member):
+    try:
+        with conn_pool.getconn() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"""
+                    SELECT *
+                    FROM members
+                    WHERE id = '{member.id}'
+                    """
+                )
+                return len(cursor.fetchall()) == 1
+    except Exception as e:
+        print(f"Exception in member_is_in_db(): {e}")
 
 def check_only_giveaway(is_owner):
     try:
@@ -249,36 +240,29 @@ def check_only_giveaway(is_owner):
                     SELECT count(*)
                     FROM giveaways
                     WHERE is_open IS TRUE
-                    AND owner_giveaway IS {is_owner}
+                    AND is_owner_only IS {is_owner}
                     """
                 )
                 response = cursor.fetchall()
-                if response[0][0] != 0:
-                    if is_owner:
-                        return ("OwnerUnique")
-                    else:
-                        return ("NonOwnerUnique")
-        return "Done"
+                return response[0][0] == 0
     except Exception as e:
         print(f"Exception in check_only_giveaway: {e}")
 
-def launch_giveaway(ctx, name, is_owner):
+def launch_giveaway(ctx, is_owner):
     try:
         with conn_pool.getconn() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
                     INSERT INTO giveaways (
-                        name,
                         creator,
-                        creation_date,
-                        owner_giveaway,
+                        created_at,
+                        is_owner_only,
                         is_open
                     )
-                    VALUES(%s, %s, %s, %s, %s)
+                    VALUES(%s, %s, %s, %s)
                     """,
                     (
-                        name,
                         ctx.author.id,
                         datetime.now(),
                         is_owner,
@@ -287,26 +271,24 @@ def launch_giveaway(ctx, name, is_owner):
                 )
                 conn.commit()
         return "Done"
-    except psycopg2.errors.UniqueViolation as e:
-        return "UniqueViolation"
     except Exception as e:
         print(f"Exception in launch_giveaway: {e}")
 
-def delete_giveaway(giveaway):
+def delete_giveaway(giveaway_id):
     try:
         with conn_pool.getconn() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
                     f"""
                     DELETE FROM giveaways
-                    WHERE name = '{giveaway}'
+                    WHERE id = '{giveaway_id}'
                     """
                     )
                 conn.commit()
-        return "Done"
     except Exception as e:
         print(f"Exception in delete_giveaway: {e}")
-        return e
+
+################ IN DEV ##################
 
 def safe_add_to_giveaway(ctx):
     # check if author is owner

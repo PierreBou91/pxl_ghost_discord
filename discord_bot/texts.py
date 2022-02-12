@@ -11,17 +11,28 @@ If you already are an owner:
     )
     return txt
 
-def giveaway(name, is_owner):
-    if is_owner:
-        txt = (
+def giveaway(is_owner):
+    owner_txt = (
 f"""
-OWNER GIVEWAY **{name}** LAUNCHED !
+**OWNER GIVEWAY LAUNCHED !**
 """
         )
-    else:
-        txt = (
+    general_txt = (
 f"""
-GIVEWAY **{name}** LAUNCHED !
+**GIVEWAY LAUNCHED !**
 """
         )
-    return txt
+    return owner_txt if is_owner else general_txt
+
+def already_giveaway(is_owner):
+    already_owner_txt = (
+f"""
+There already is an owner giveaway ongoing. Close it before launching a new one.
+"""
+    )
+    already_non_owner_txt = (
+f"""
+There already is a non owner giveaway ongoing. Close it before launching a new one.
+"""
+    )
+    return already_owner_txt if is_owner else already_non_owner_txt
