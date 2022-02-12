@@ -71,6 +71,9 @@ async def ghost(ctx, number: int):
 @bot.event
 async def on_member_join(member):
     await member.add_roles(932799395865444382)
-    db.add_user(db.member_adapter(member))
+    if not db.member_is_in_db(member):
+        db.add_user(db.member_adapter_from_discord(member))
+    else:
+        db.update_is_here(member, True)
 
 bot.run(environ['CYBER_GHOST_TOKEN'])

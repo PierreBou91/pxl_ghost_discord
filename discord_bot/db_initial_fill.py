@@ -23,19 +23,7 @@ async def add_all_members(ctx):
     member_list = []
     members = ctx.guild.members
     for mem in members:
-        member_list.append(db.GhostMember(
-                mem.id,
-                mem.name,
-                mem.display_name,
-                mem.nick,
-                mem.discriminator,
-                mem.mention,
-                mem.created_at,
-                mem.joined_at,
-                mem.top_role.id,
-                mem.bot
-                )
-            )
+        member_list.append(db.member_adapter_from_discord(mem))
     db.add_multiple_users(member_list)
     print("done")
 
