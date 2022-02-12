@@ -45,7 +45,6 @@ async def on_message(message):
 #########################################
 #           GENERAL COMMANDS            #
 #########################################
-
 @bot.command()
 async def ghost(ctx, number: int):
     r = random.randint(1,10000)
@@ -73,7 +72,6 @@ async def rules(ctx):
 #########################################
 #            ADMIN COMMANDS             #
 #########################################
-
 @bot.command()
 @commands.has_any_role("Admin")
 async def update_db(ctx):
@@ -97,7 +95,7 @@ async def update_db(ctx):
 
     db.update_is_here(has_left, False)
 
-    # Update the nick and display_name
+    # Update the memmbers that have changed
     have_changed = []
 
     for id in ids:

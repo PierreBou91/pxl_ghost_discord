@@ -34,15 +34,15 @@ async def on_message(message):
     if message.author.id == 931674481628434503:
         return
 
-    # Giveaway channel id: 931945712290258994
+    # giveaway channel id: 931945712290258994
     # testbot channel id: 931679915248594944
     if message.channel.id == 931679915248594944:
         pass    
     print(message.channel.name)
-    print(message.channel.id)    
+    print(message.channel.id)
     bool(re.match(r"^0x[a-fA-F0-9]{40}$", message.content))
     
-    # Necessary command for the command to work
+    # necessary call for the commands to work
     await bot.process_commands(message)
 
 @bot.command()
