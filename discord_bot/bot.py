@@ -110,6 +110,22 @@ async def update_db(ctx):
 
     await ctx.reply("Database updated ;D")
 
+@bot.command()
+@commands.has_any_role("Admin")
+async def giveaway(ctx, is_owner=None):
+    is_owner = True if (is_owner == "owner") else False
+    is_only_giveaway = True if db.check_only_giveaway(is_owner) else False
+    if is_only_giveaway:
+        db.launch_giveaway(ctx, is_owner)
+        await ctx.reply(texts.giveaway(is_owner))
+    else:
+        await ctx.reply(texts.already_giveaway(is_owner))
+
+@bot.command()
+@commands.has_any_role("Admin")
+async def delete(ctx, giveaway_id):
+    db.delete_giveaway(giveaway_id)
+
 #########################################
 #             ON MEMBER JOIN            #
 #########################################
