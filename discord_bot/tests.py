@@ -1,11 +1,6 @@
 import discord
 from discord.ext import commands
 from os import environ
-import re
-
-from zmq import has
-import db_discord_helper as db
-import texts
 
 #########################################
 #           BOILER PLATE CODE           #
@@ -16,6 +11,7 @@ bot = commands.Bot(
     command_prefix='/',
     description="Discord bot on Heroku",
     intents=intents)
+
 
 @bot.event
 async def on_ready():
@@ -28,12 +24,13 @@ async def on_ready():
 #              COMMANDS                 #
 #########################################
 
+
 @bot.event
 async def on_message(message):
     # don't respond to ourselves
     if message.author.id == 931674481628434503:
         return
-    
+
     # necessary call for the commands to work
     await bot.process_commands(message)
 

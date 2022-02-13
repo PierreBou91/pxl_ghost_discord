@@ -10,6 +10,7 @@ bot = commands.Bot(
     description="Discord bot on Heroku",
     intents=intents)
 
+
 @bot.event
 async def on_ready():
     print('Logged in as')
