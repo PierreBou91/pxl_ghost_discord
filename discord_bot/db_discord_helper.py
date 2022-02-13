@@ -324,7 +324,24 @@ def check_if_member_in_giveaway(member):
             return False
         return member.id in response[0][2]
     except Exception as e:
-        print(f"Exception in check_if_member_in_giveaway: {e}")   
+        print(f"Exception in check_if_member_in_giveaway: {e}")
+
+
+def add_member_to_giveaway(member):
+    try:
+        conn, cursor = open_connection()
+        cursor.execute(
+            f"""
+            UPDATE giveaways
+            SET participants = participants || '{{{member.id}}}'
+            WHERE is_open IS TRUE
+            """
+            )
+        conn.commit()
+        close_connection(conn, cursor)
+    except Exception as e:
+        print(f"Exception in add_member_to_giveaways: {e}")
+        return e
 
 ### Wallet stuff
 
@@ -399,19 +416,3 @@ def close_connection(connection, cursor):
     CONN_POOL.putconn(connection)
 
 ################ IN DEV ##################
-
-def add_member_to_giveaway(member):
-    try:
-        conn, cursor = open_connection()
-        cursor.execute(
-            f"""
-            UPDATE giveaways
-            SET participants = participants || '{{{member.id}}}'
-            WHERE is_open IS TRUE
-            """
-            )
-        conn.commit()
-        close_connection(conn, cursor)
-    except Exception as e:
-        print(f"Exception in add_member_to_giveaways: {e}")
-        return e
