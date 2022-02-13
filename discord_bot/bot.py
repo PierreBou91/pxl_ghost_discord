@@ -69,7 +69,7 @@ async def on_message(message):
             # add user to giveaway
             else:
                 db.add_member_to_giveaway(
-                    db.member_adapter_from_db(message.author))
+                    db.member_adapter_from_discord(message.author))
                 await message.reply(texts.successful_giveaway_register())
         else:
             await message.channel.send(texts.no_ongoing_giveway())
