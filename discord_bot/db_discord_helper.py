@@ -1,4 +1,5 @@
 from faulthandler import is_enabled
+from unittest import result
 import psycopg2
 from psycopg2 import pool
 from os import environ
@@ -7,11 +8,13 @@ from datetime import datetime
 DATABASE_URL = environ['DATABASE_URL']
 
 try:
-    conn_pool =  pool.SimpleConnectionPool(5, 15, DATABASE_URL, sslmode='require')
-    if (conn_pool):
+    CONN_POOL =  pool.SimpleConnectionPool(5, 15, DATABASE_URL, sslmode='require')
+    if (CONN_POOL):
         print("Database connection pool created successfully")
 except (Exception, psycopg2.DatabaseError) as error:
     print("Error while connecting to PostgreSQL", error)
+
+### Class and adapters
 class GhostMember:
     def __init__(self, id, name, display_name, nick, discriminator, mention, created_at, joined_at, top_role, is_bot, is_here=True):
         self.id = id
@@ -66,49 +69,50 @@ def member_adapter_from_db(member):
     )
     return adapted_member
 
+### Member stuff
+
 def add_user(member):
     try:
-        with conn_pool.getconn() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    """
-                    INSERT INTO members (
-                        id,
-                        name,
-                        display_name,
-                        nick,
-                        discriminator,
-                        mention,
-                        created_at,
-                        joined_at,
-                        top_role,
-                        is_bot,
-                        is_here
-                    )
-                    VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    """,
-                    (
-                    member.id,
-                    member.name,
-                    member.display_name,
-                    member.nick,
-                    member.discriminator,
-                    member.mention,
-                    member.created_at,
-                    member.joined_at,
-                    member.top_role,
-                    member.is_bot,
-                    True
-                    )
-                )
-                conn.commit()
+        conn, cursor = open_connection()
+        cursor.execute(
+            """
+            INSERT INTO members (
+                id,
+                name,
+                display_name,
+                nick,
+                discriminator,
+                mention,
+                created_at,
+                joined_at,
+                top_role,
+                is_bot,
+                is_here
+            )
+            VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """,
+            (
+            member.id,
+            member.name,
+            member.display_name,
+            member.nick,
+            member.discriminator,
+            member.mention,
+            member.created_at,
+            member.joined_at,
+            member.top_role,
+            member.is_bot,
+            True
+            )
+        )
+        conn.commit()
+        close_connection(conn, cursor)
     except Exception as e:
         print(f"Exception in add_user: {e}")
 
 def add_multiple_users(memberlist):
     try:
-        conn = conn_pool.getconn()
-        cursor = conn.cursor()
+        conn, cursor = open_connection()
         for member in memberlist:
             cursor.execute(
                 """
@@ -119,14 +123,13 @@ def add_multiple_users(memberlist):
                     nick,
                     discriminator,
                     mention,
-                    wallet,
                     created_at,
                     joined_at,
                     top_role,
                     is_bot,
                     is_here
                 )
-                VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                 member.id,
@@ -135,7 +138,6 @@ def add_multiple_users(memberlist):
                 member.nick,
                 member.discriminator,
                 member.mention,
-                None,
                 member.created_at,
                 member.joined_at,
                 member.top_role,
@@ -144,31 +146,31 @@ def add_multiple_users(memberlist):
                 )
             )
         conn.commit()
-        cursor.close()
-        conn_pool.putconn(conn)
+        close_connection(conn, cursor)
     except Exception as e:
         print(f"Exception in add_multiple_users: {e}")
 
-def get_members():
+def get_all_members():
     members = {}
     try:
-        with conn_pool.getconn() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    """
-                    SELECT *
-                    FROM members
-                    """
-                )
-                for row in cursor.fetchall():
-                    members[str(row[0])] = member_adapter_from_db(row)
+        conn, cursor = open_connection()
+        cursor.execute(
+            """
+            SELECT *
+            FROM members
+            """
+        )
+        response = cursor.fetchall()
+        close_connection(conn, cursor)
+        for row in response:
+            members[str(row[0])] = member_adapter_from_db(row)
         return members
     except Exception as e:
-        print(f"Exception in get_members: {e}")
+        print(f"Exception in get_all_members: {e}")
 
 def update_is_here(memberlist, is_here):
     try:
-        conn = conn_pool.getconn()
+        conn = CONN_POOL.getconn()
         cursor = conn.cursor()
         for mem in memberlist:
             cursor.execute(
@@ -179,14 +181,13 @@ def update_is_here(memberlist, is_here):
                 """
             )
         conn.commit()
-        cursor.close()
-        conn_pool.putconn(conn)
+        close_connection(conn, cursor)
     except Exception as e:
         print(f"Exception in update_is_here(): {e}")
 
 def update_db(memberlist):
     try:
-        conn = conn_pool.getconn()
+        conn = CONN_POOL.getconn()
         cursor = conn.cursor()
         for mem in memberlist:
             cursor.execute(
@@ -197,149 +198,220 @@ def update_db(memberlist):
                 """
             )
         conn.commit()
-        cursor.close()
-        conn_pool.putconn(conn)
+        close_connection(conn, cursor)
     except Exception as e:
         print(f"Exception in update_db(): {e}")
 
 def member_is_in_db(member):
     try:
-        with conn_pool.getconn() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    f"""
-                    SELECT *
-                    FROM members
-                    WHERE id = '{member.id}'
-                    """
-                )
-                return len(cursor.fetchall()) == 1
+        conn, cursor = open_connection()
+        cursor.execute(
+            f"""
+            SELECT *
+            FROM members
+            WHERE id = '{member.id}'
+            """
+        )
+        response = cursor.fetchall()
+        close_connection(conn, cursor)
+        return len(response) == 1
     except Exception as e:
         print(f"Exception in member_is_in_db(): {e}")
 
+def get_member_by_id(id):
+    try:
+        conn, cursor = open_connection()
+        cursor.execute(
+            f"""
+            SELECT *
+            FROM members
+            WHERE id = '{id}'
+            """
+        )
+        response = cursor.fetchall()
+        close_connection(conn, cursor)
+        return member_adapter_from_db(response[0])
+    except Exception as e:
+        print(f"Exception in get_member_by_id: {e}")
+
+### Giveaway stuff
+
 def check_only_giveaway(is_owner):
     try:
-        with conn_pool.getconn() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    f"""
-                    SELECT count(*)
-                    FROM giveaways
-                    WHERE is_open IS TRUE
-                    AND is_owner_only IS {is_owner}
-                    """
-                )
-                response = cursor.fetchall()
-                return response[0][0] == 0
+        conn, cursor = open_connection()
+        cursor.execute(
+            f"""
+            SELECT count(*)
+            FROM giveaways
+            WHERE is_open IS TRUE
+            AND is_owner_only IS {is_owner}
+            """
+        )
+        response = cursor.fetchall()
+        close_connection(conn, cursor)
+        return response[0][0] == 0
     except Exception as e:
         print(f"Exception in check_only_giveaway: {e}")
 
 def launch_giveaway(ctx, is_owner):
     try:
-        with conn_pool.getconn() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    """
-                    INSERT INTO giveaways (
-                        creator,
-                        created_at,
-                        is_owner_only,
-                        is_open
-                    )
-                    VALUES(%s, %s, %s, %s)
-                    """,
-                    (
-                        ctx.author.id,
-                        datetime.now(),
-                        is_owner,
-                        True
-                    )
-                )
-                conn.commit()
+        conn, cursor = open_connection()
+        cursor.execute(
+            """
+            INSERT INTO giveaways (
+                creator,
+                created_at,
+                is_owner_only,
+                is_open
+            )
+            VALUES(%s, %s, %s, %s)
+            """,
+            (
+                ctx.author.id,
+                datetime.now(),
+                is_owner,
+                True
+            )
+        )
+        conn.commit()
+        close_connection(conn, cursor)
     except Exception as e:
         print(f"Exception in launch_giveaway: {e}")
 
 def delete_giveaway(giveaway_id):
     try:
-        with conn_pool.getconn() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    f"""
-                    DELETE FROM giveaways
-                    WHERE id = '{giveaway_id}'
-                    """
-                    )
-                conn.commit()
+        conn, cursor = open_connection()
+        cursor.execute(
+            f"""
+            DELETE FROM giveaways
+            WHERE id = '{giveaway_id}'
+            """
+            )
+        conn.commit()
+        close_connection(conn, cursor)
     except Exception as e:
         print(f"Exception in delete_giveaway: {e}")
 
-################ IN DEV ##################
-
-def add_wallet(member, wallet):
+def check_if_ongoing_giveaway():
     try:
-        with conn_pool.getconn() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    """
-                    INSERT INTO wallets (
-                        address,
-                        owner
-                    )
-                    VALUES(%s, %s)
-                    """,
-                    (
-                        wallet,
-                        member.id,
-                    )
-                )
-                conn.commit()
+        conn, cursor = open_connection()
+        cursor.execute(
+            f"""
+            SELECT count(*)
+            FROM giveaways
+            WHERE is_open IS TRUE
+            """
+        )
+        response = cursor.fetchall()
+        close_connection(conn, cursor)
+        return response[0][0] > 0
     except Exception as e:
-        print(f"Exception in add_wallet: {e}")
+        print(f"Exception in check_only_giveaway: {e}")
+
+def check_if_member_in_giveaway(member):
+    try:
+        conn, cursor = open_connection()
+        cursor.execute(
+            f"""
+            SELECT *
+            FROM giveaways
+            WHERE is_open IS TRUE
+            """
+        )
+        response = cursor.fetchall()
+        close_connection(conn, cursor)
+        if response[0][2] is None:
+            return False
+        return member.id in response[0][2]
+    except Exception as e:
+        print(f"Exception in check_if_member_in_giveaway: {e}")   
+
+### Wallet stuff
 
 def wallet_already_in_db(wallet):
     try:
-        with conn_pool.getconn() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    f"""
-                    SELECT *
-                    FROM wallets
-                    WHERE address = '{wallet}'
-                    """
-                )
-                conn.commit()
+        conn, cursor = open_connection()
+        cursor.execute(
+            f"""
+            SELECT *
+            FROM wallets
+            WHERE address = '{wallet}'
+            """
+        )
+        response = cursor.fetchall()
+        close_connection(conn, cursor)
+        if len(response) == 0:
+            return False, None
+        else:
+            return True, get_member_by_id(response[0][2])
     except Exception as e:
-        print(f"Exception in add_wallet: {e}") 
+        print(f"Exception in wallet_already_in_db: {e}") 
 
-
-def safe_add_to_giveaway(ctx):
-    # check if author is owner
-    # if is owner
-        # check if there is an owner giveway
-            # if yes:
-                # check if already in the giveaway
-    
-    is_owner = False
-    for role in ctx.author.roles:
-        if role.id == 932792909504323684:
-            is_owner = True
-    if is_owner:
-        add_owner_to_giveaways(ctx)
-    
-
-def add_owner_to_giveaways(ctx):
+def add_wallet(member, wallet):
     try:
-        with conn_pool.getconn() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    f"""
-                    UPDATE giveaways
-                    SET participants = participants || '{{{str(ctx.author.id)}}}'
-                    WHERE is_open IS TRUE
-                    """
-                    )
-                conn.commit()
-        return "Done"
+        conn, cursor = open_connection()
+        cursor.execute(
+            """
+            INSERT INTO wallets (
+                address,
+                owner
+            )
+            VALUES(%s, %s)
+            """,
+            (
+                wallet,
+                member.id,
+            )
+        )
+        conn.commit()
+        close_connection(conn, cursor)
     except Exception as e:
-        print(f"Exception in add_owner_to_giveaways: {e}")
+        print(f"Exception in add_wallet: {e}")
+
+def wallet_matches_onwer(member, wallet):
+    try:
+        conn, cursor = open_connection()
+        cursor.execute(
+            f"""
+            SELECT *
+            FROM wallets
+            WHERE address = '{wallet}'
+            """
+        )
+        response = cursor.fetchall()
+        close_connection(conn, cursor)
+        if response[0][2] == member.id:
+            return True, member
+        else:
+            return False, get_member_by_id(response[0][2])
+    except Exception as e:
+        print(f"Exception in add_wallet: {e}")
+
+############### HANDLERS #################
+
+def open_connection():
+    conn = CONN_POOL.getconn()
+    cursor = conn.cursor()
+    return conn, cursor
+
+def close_connection(connection, cursor):
+    cursor.close()
+    CONN_POOL.putconn(connection)
+
+################ IN DEV ##################
+
+def add_member_to_giveaway(member):
+    try:
+        conn, cursor = open_connection()
+        cursor.execute(
+            f"""
+            UPDATE giveaways
+            SET participants = participants || '{{{member.id}}}'
+            WHERE is_open IS TRUE
+            """
+            )
+        conn.commit()
+        close_connection(conn, cursor)
+    except Exception as e:
+        print(f"Exception in add_member_to_giveaways: {e}")
         return e

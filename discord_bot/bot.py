@@ -5,6 +5,7 @@ import db_discord_helper as db
 import random
 import aws_connect_helper as s3
 import texts
+import re
 
 #########################################
 #           BOILER PLATE CODE           #
@@ -38,6 +39,37 @@ async def on_message(message):
         await message.channel.send('NO, YOU have to say ping and ONLY I get to say pong !')
     elif str(message.content).casefold() == 'f':
         await message.channel.send('F')
+
+    # giveaway channel id: 931945712290258994
+    # testbot channel id: 931679915248594944
+
+    if message.channel.id == 931945712290258994:
+        if db.check_if_ongoing_giveaway():
+            if not bool(re.match(r"^0x[a-fA-F0-9]{40}$", message.content)):
+                    await message.reply(texts.channel_reserved())
+                    await message.reply(texts.wrong_wallet_address())
+        else:
+            await message.channel.send(texts.no_ongoing_giveway())
+
+    if bool(re.match(r"^0x[a-fA-F0-9]{40}$", message.content)):
+        wallet_is_in_db, wallet_owner = db.wallet_already_in_db(message.content)
+        if not wallet_is_in_db:
+            db.add_wallet(db.member_adapter_from_discord(message.author),message.content)
+        if db.check_if_ongoing_giveaway():
+            # check if wallet matches the owner
+            matches_author, wallet_owner = db.wallet_matches_onwer(db.member_adapter_from_discord(message.author), message.content)
+            if not matches_author:
+                await message.reply(texts.wallet_does_not_match(wallet_owner))
+                return
+            # check if user is already in the giveaway
+            if db.check_if_member_in_giveaway(db.member_adapter_from_discord(message.author)):
+                await message.reply(texts.member_already_in_giveaway())
+            # add user to giveaway
+            else:
+                db.add_member_to_giveaway(db.member_adapter_from_db(message.author))
+                await message.reply(texts.successful_giveaway_register())
+        else:
+            await message.channel.send(texts.no_ongoing_giveway())
     
     # Necessary command for the command to work
     await bot.process_commands(message)
@@ -81,7 +113,7 @@ async def update_db(ctx):
         server_members_dict[str(mem.id)] = db.member_adapter_from_discord(mem)
 
     # Load members from db
-    db_members_dict = db.get_members()
+    db_members_dict = db.get_all_members()
 
     # Update the "is_here" value
     has_left = []
