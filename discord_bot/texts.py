@@ -3,12 +3,9 @@ import db_discord_helper as db
 def rules():
     txt = (
 """
-👉 Go to channel give-aways and type : /giv <your wallet adress> 
-        example: `/giv 0x0652837479284478393940038848`
-
-If you already are an owner:
-👉 Go to channel haunted-tavern  and type : /own <your wallet adress>
-        example: `/own 0x0652837479284478393940038848`
+👉 Go to channel give-aways and type your ETH wallet address.
+Example:
+`0x5b5d30f1B2BF7b81214D3678aAe73D4e5F7455f5`
 """
     )
     return txt
