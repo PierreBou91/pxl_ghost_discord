@@ -13,14 +13,13 @@ try:
 except (Exception, psycopg2.DatabaseError) as error:
     print("Error while connecting to PostgreSQL", error)
 class GhostMember:
-    def __init__(self, id, name, display_name, nick, discriminator, mention, created_at, joined_at, top_role, is_bot, wallet=None, is_here=True):
+    def __init__(self, id, name, display_name, nick, discriminator, mention, created_at, joined_at, top_role, is_bot, is_here=True):
         self.id = id
         self.name = name
         self.display_name = display_name
         self.nick = nick
         self.discriminator = discriminator
         self.mention = mention
-        self.wallet = wallet
         self.created_at = created_at
         self.joined_at = joined_at
         self.top_role = top_role
@@ -60,11 +59,10 @@ def member_adapter_from_db(member):
         member[4],
         member[5],
         member[7],
+        member[6],
         member[8],
         member[9],
         member[10],
-        member[6],
-        member[11]
     )
     return adapted_member
 
@@ -81,14 +79,13 @@ def add_user(member):
                         nick,
                         discriminator,
                         mention,
-                        wallet,
                         created_at,
                         joined_at,
                         top_role,
                         is_bot,
                         is_here
                     )
-                    VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """,
                     (
                     member.id,
@@ -97,7 +94,6 @@ def add_user(member):
                     member.nick,
                     member.discriminator,
                     member.mention,
-                    None,
                     member.created_at,
                     member.joined_at,
                     member.top_role,
@@ -106,9 +102,6 @@ def add_user(member):
                     )
                 )
                 conn.commit()
-        return "Done"
-    except psycopg2.errors.UniqueViolation as e:
-        return "UniqueViolation"
     except Exception as e:
         print(f"Exception in add_user: {e}")
 
@@ -153,9 +146,6 @@ def add_multiple_users(memberlist):
         conn.commit()
         cursor.close()
         conn_pool.putconn(conn)
-        return "Done"
-    except psycopg2.errors.UniqueViolation as e:
-        return "UniqueViolation"
     except Exception as e:
         print(f"Exception in add_multiple_users: {e}")
 
@@ -173,8 +163,6 @@ def get_members():
                 for row in cursor.fetchall():
                     members[str(row[0])] = member_adapter_from_db(row)
         return members
-    except psycopg2.errors.UniqueViolation as e:
-        return "UniqueViolation"
     except Exception as e:
         print(f"Exception in get_members: {e}")
 
@@ -193,7 +181,6 @@ def update_is_here(memberlist, is_here):
         conn.commit()
         cursor.close()
         conn_pool.putconn(conn)
-        return ("Done")
     except Exception as e:
         print(f"Exception in update_is_here(): {e}")
 
@@ -212,7 +199,6 @@ def update_db(memberlist):
         conn.commit()
         cursor.close()
         conn_pool.putconn(conn)
-        return ("Done")
     except Exception as e:
         print(f"Exception in update_db(): {e}")
 
@@ -270,7 +256,6 @@ def launch_giveaway(ctx, is_owner):
                     )
                 )
                 conn.commit()
-        return "Done"
     except Exception as e:
         print(f"Exception in launch_giveaway: {e}")
 
@@ -289,6 +274,43 @@ def delete_giveaway(giveaway_id):
         print(f"Exception in delete_giveaway: {e}")
 
 ################ IN DEV ##################
+
+def add_wallet(member, wallet):
+    try:
+        with conn_pool.getconn() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO wallets (
+                        address,
+                        owner
+                    )
+                    VALUES(%s, %s)
+                    """,
+                    (
+                        wallet,
+                        member.id,
+                    )
+                )
+                conn.commit()
+    except Exception as e:
+        print(f"Exception in add_wallet: {e}")
+
+def wallet_already_in_db(wallet):
+    try:
+        with conn_pool.getconn() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"""
+                    SELECT *
+                    FROM wallets
+                    WHERE address = '{wallet}'
+                    """
+                )
+                conn.commit()
+    except Exception as e:
+        print(f"Exception in add_wallet: {e}") 
+
 
 def safe_add_to_giveaway(ctx):
     # check if author is owner

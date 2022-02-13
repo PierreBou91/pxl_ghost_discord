@@ -38,9 +38,15 @@ async def on_message(message):
     # testbot channel id: 931679915248594944
     if message.channel.id == 931679915248594944:
         pass    
-    print(message.channel.name)
-    print(message.channel.id)
-    bool(re.match(r"^0x[a-fA-F0-9]{40}$", message.content))
+    # print(message.channel.name)
+    # print(message.channel.id)
+    # bool(re.match(r"^0x[a-fA-F0-9]{40}$", message.content))
+    # if bool(re.match(r"^0x[a-fA-F0-9]{40}$", message.content)):
+    #     print(message.author)
+    #     print(db.member_adapter_from_discord(message.author).__dict__)
+    #     wallet_is_in, wallet_owner = db.wallet_already_in_db(message.content)
+    #     db.add_wallet(db.member_adapter_from_discord(message.author), message.content)
+    print(db.get_members()["375291554543173632"].__dict__)
     
     # necessary call for the commands to work
     await bot.process_commands(message)
