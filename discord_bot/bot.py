@@ -167,11 +167,12 @@ async def delete(ctx, giveaway_id):
 
 @bot.event
 async def on_member_join(member):
-    await member.add_roles(932799395865444382)
+    role = discord.utils.get(member.guild.roles, id=932799395865444382)
+    await member.add_roles(role)
     if not db.member_is_in_db(member):
         db.add_user(db.member_adapter_from_discord(member))
     else:
-        memberlist = ()
+        memberlist = []
         memberlist.append(db.member_adapter_from_discord(member))
         db.update_is_here(memberlist, True)
 
