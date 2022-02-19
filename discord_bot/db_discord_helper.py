@@ -1,4 +1,3 @@
-from faulthandler import is_enabled
 import psycopg2
 from psycopg2 import pool
 from os import environ
